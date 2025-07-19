@@ -29,7 +29,6 @@ Parameters:
   TagGitHubRepo:
     Type: String
     Description: Value for the GitHubRepo tag (matches repository name).
-    Default: DEACloud_landing_zone_extensions
   TagManagedBy:
     Type: String
     Description: Value for the managed_by tag.
