@@ -113,7 +113,7 @@ jobs:
   deploy:
     needs: plan
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: codebuild-lz-extensions-${{ github.run_id }}-${{ github.run_attempt }}
+    runs-on: ubuntu-latest
     permissions: { contents: read, id-token: write }
     defaults: { run: { working-directory: ./01_infrastructure } }
 
