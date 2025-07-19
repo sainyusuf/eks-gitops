@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  CloudFormation stack to configure AWS IAM OIDC provider for GitHub Actions,
+  an IAM Role with an INLINE policy for deployment, and an S3 bucket for state storage.
+  WARNING: Review and restrict the inline IAM policy permissions before deployment.
+
+Parameters:
+  GitHubOrganization:
+    Type: String
+    Description: Your GitHub organization name.
+  GitHubRepository:
+    Type: String
+    Description: Your GitHub repository name.
+  WorkloadName:
+    Type: String
+    Description: The name identifier for the workload.
+    Default: gitops-project
+  S3StateBucketBaseName:
+    Type: String
+    Description: The base name for the S3 bucket to store state (workload name and account ID will be appended).
+    Default: terraform-state
+  TagEnvironment:
+    Type: String
+    Description: Value for the Environment tag.
+    Default: Prod
+  TagOwner:
+    Type: String
+    Description: Value for the Owner tag.
+  TagGitHubRepo:
+    Type: String
+    Description: Value for the GitHubRepo tag (matches repository name).
+    Default: DEACloud_landing_zone_extensions
+  TagManagedBy:
+    Type: String
+    Description: Value for the managed_by tag.
+    Default: SainArchitect
+
+Resources:
+  # ------------------------------------------------------------
+  # OIDC Provider for GitHub Actions
+  # ------------------------------------------------------------
+  GitHubOidcProvider:
+    Type: AWS::IAM::OIDCProvider
+    Properties:
+      Url: https://token.actions.githubusercontent.com
+      ClientIdList:
+        - sts.amazonaws.com
+      ThumbprintList:
+        # IMPORTANT: Verify this thumbprint is current before deployment.
+        # See AWS documentation for instructions on retrieving the latest thumbprint:
+        # https://docs.aws.amazon.com/IAM/latest/UserGuide/id_roles_providers_create_oidc_verify-thumbprint.html
+        - 6938fd4d98bab03faadb97b34396831e3780aea1
+      Tags:
+        - Key: Name
+          Value: github-actions-oidc-provider
+        - Key: workload
+          Value: !Ref WorkloadName
+
+  # ------------------------------------------------------------
+  # IAM Role for GitHub Actions (with Inline Policy)
+  # ------------------------------------------------------------
+  GitHubActionsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Description: IAM Role assumed by GitHub Actions for workload deployment via OIDC. Contains inline policy.
+      RoleName: !Sub '${WorkloadName}-github-actions-deploy-role'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Federated: !GetAtt GitHubOidcProvider.Arn
+            Action: sts:AssumeRoleWithWebIdentity
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: sts.amazonaws.com
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOrganization}/${GitHubRepository}:*'
+      Path: /
+      Policies:
+        - PolicyName: !Sub '${WorkloadName}-github-actions-inline-deploy-policy'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              # ------------------------------------------------------------
+              # CRITICAL SECURITY WARNING: LEAST PRIVILEGE PRINCIPLE
+              # ------------------------------------------------------------
+              # Granting overly broad permissions (like Action: '*' on Resource: '*')
+              # is EXTREMELY DANGEROUS.
+              #
+              #
+              # Example for Terraform deploying resources and managing state in S3/DynamoDB:
+              # - Sid: AllowTerraformStateAccess
+              #   Effect: Allow
+              #   Action:
+              #     - s3:ListBucket
+              #     - s3:GetObject
+              #     - s3:PutObject
+              #     - s3:DeleteObject
+              #   Resource:
+              #     - !Sub 'arn:aws:s3:::${StateBucket}'
+              #     - !Sub 'arn:aws:s3:::${StateBucket}/*'
+              # - Sid: AllowTerraformLocking # If using DynamoDB for state locking
+              #   Effect: Allow
+              #   Action:
+              #     - dynamodb:GetItem
+              #     - dynamodb:PutItem
+              #     - dynamodb:DeleteItem
+              #   Resource: 'arn:aws:dynamodb:REGION:ACCOUNT_ID:table/your-lock-table-name' # Replace with your lock table ARN
+              # - Sid: AllowResourceDeployment # Add permissions needed by Terraform/your tool
+              #   Effect: Allow
+              #   Action:
+              #     - ec2:Describe*
+              #     - ec2:Create*
+              #     # Add other service actions (e.g., rds:*, lambda:*, iam:CreateRole, etc.)
+              #   Resource: '*' # Scope down Resource where possible!
+              # ------------------------------------------------------------
+              - Effect: Allow
+                Action:
+                 - '*'
+                Resource: '*'
+      Tags:
+        - Key: Name
+          Value: !Sub '${WorkloadName}-github-actions-deploy-role'
+        - Key: Environment
+          Value: !Ref TagEnvironment
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: GitHubRepo
+          Value: !Ref TagGitHubRepo
+        - Key: managed_by
+          Value: !Ref TagManagedBy
+        - Key: workload
+          Value: !Ref WorkloadName
+
+
+  # ------------------------------------------------------------
+  # S3 Bucket for State Storage (e.g., Terraform State)
+  # ------------------------------------------------------------
+  StateBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub '${S3StateBucketBaseName}-${WorkloadName}-${AWS::AccountId}'
+      VersioningConfiguration:
+        Status: Enabled
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      Tags:
+        - Key: Environment
+          Value: !Ref TagEnvironment
+        - Key: Owner
+          Value: !Ref TagOwner
+        - Key: GitHubRepo
+          Value: !Ref TagGitHubRepo
+        - Key: managed_by
+          Value: !Ref TagManagedBy
+        - Key: workload
+          Value: !Ref WorkloadName
+
+
+Outputs:
+  S3StateBucketName:
+    Description: The name of the S3 bucket created for state storage.
+    Value: !Ref StateBucket
+  GitHubActionsRoleArn:
+    Description: The ARN of the IAM role created by GitHub Actions (with inline policy).
+    Value: !GetAtt GitHubActionsRole.Arn
