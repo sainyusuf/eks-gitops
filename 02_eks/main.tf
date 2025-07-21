@@ -2,7 +2,7 @@ module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.37.1"
 
-  cluster_name    = "shared-service-prod-eks"
+  cluster_name    = "gitops-prod-eks"
   cluster_version = "1.33"
 
   vpc_id     = data.terraform_remote_state.infra.outputs.shared_vpc_id_prod
