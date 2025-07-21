@@ -14,3 +14,9 @@ workload = {
     tools          = "terraform"
   }
 }
+
+tags = {
+  "Environment" = "Prod"
+  "Owner"       = "Husain"
+  "GitHubRepo"  = "eks-gitops"
+}
