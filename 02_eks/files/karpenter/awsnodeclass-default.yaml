@@ -1,0 +1,14 @@
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  amiSelectorTerms:
+    - alias: bottlerocket@latest
+  instanceProfile: ${instance_profile_name}
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery/shared-service-prod-eks : "true"
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery/shared-service-prod-eks : "true"

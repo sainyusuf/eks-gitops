@@ -1,0 +1,31 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: baseline-od
+
+spec:
+  limits:
+    cpu: "2"
+    memory: 4Gi
+
+  disruption:
+    consolidationPolicy: WhenEmpty
+    consolidateAfter: 5m
+
+  template:
+    metadata:
+      labels:
+        workload: od
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+      expireAfter: Never
+      requirements:
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        - key: karpenter.k8s.aws/instance-family
+          operator: In
+          values: ["t3", "t3a", "m7g"]

@@ -1,0 +1,166 @@
+name: 02 – EKS Deployment Workflow
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+# ────────────────────────────────────────────────────────────────
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '02_eks/**'
+      - 'modules/**'
+      - '.github/workflows/eks.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '02_eks/**'
+      - 'modules/**'
+      - '.github/workflows/eks.yml'
+
+env:
+  TF_VERSION: 1.11.4
+  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+
+
+jobs:
+
+# 1) LINT  ───────────────────────────────────────────────────────
+  lint:
+    runs-on: ubuntu-latest
+    permissions: { contents: read }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: true
+
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-${{ hashFiles('.pre-commit-config.yaml') }}
+
+      - name: Run pre-commit hooks
+        env: { SKIP: terraform_docs }
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files --show-diff-on-failure
+
+# 2) PLAN  ───────────────────────────────────────────────────────
+  plan:
+    needs: lint
+    runs-on: ubuntu-latest
+    permissions: { pull-requests: write, contents: read, id-token: write }
+    defaults: { run: { working-directory: ./02_eks } }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: plugin-cache-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: plugin-cache-${{ runner.os }}-
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
+          aws-region:     ${{ secrets.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Create Plugin Cache Dir
+        run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Configure Git Credentials
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "https://github.com/"
+          echo "::add-mask::${GH_PAT}"
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        id: plan
+        run: |
+          set +e
+          terraform plan -detailed-exitcode -out=tfplan
+          echo "exitcode=$?" >> "$GITHUB_OUTPUT"
+        continue-on-error: true
+
+      - name: Stop on plan error
+        if: steps.plan.outputs.exitcode == '1'
+        run: exit 1
+
+      - name: Convert plan to JSON
+        if: contains('0 2', steps.plan.outputs.exitcode)
+        run: terraform show -json tfplan > tfplan.json
+
+      - name: Comment plan on PR
+        if: github.event_name == 'pull_request' && contains('0 2', steps.plan.outputs.exitcode)
+        uses: liatrio/terraform-change-pr-commenter@v1.7.1
+        with:
+          json-file: 02_eks/tfplan.json
+
+# 3) DEPLOY  ─────────────────────────────────────────────────────
+  deploy:
+    needs: plan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions: { contents: read, id-token: write }
+    defaults: { run: { working-directory: ./02_eks } }
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/cache@v4
+        with:
+          path: ${{ env.TF_PLUGIN_CACHE_DIR }}
+          key: plugin-cache-${{ runner.os }}-${{ hashFiles('**/.terraform.lock.hcl') }}
+          restore-keys: plugin-cache-${{ runner.os }}-
+
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.DEPLOYMENT_ROLE_ARN }}
+          aws-region:     ${{ secrets.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+          terraform_wrapper: false
+
+      - name: Create Plugin Cache Dir
+        run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
+
+      - name: Configure Git Credentials
+        env:
+          GH_PAT: ${{ secrets.GH_PAT }}
+        run: |
+          git config --global url."https://x-access-token:${GH_PAT}@github.com/".insteadOf "https://github.com/"
+          echo "::add-mask::${GH_PAT}"
+
+      - name: Terraform Init
+        run: terraform init -input=false
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
