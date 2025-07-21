@@ -1,0 +1,10 @@
+serviceAccount:
+  create: true
+  name: external-secrets
+  annotations:
+    eks.amazonaws.com/role-arn: ${eso_iam_role_arn}
+crds:
+  createClusterExternalSecret: true
+  createClusterSecretStore: true
+  createClusterGenerator: true
+  createClusterPushSecret: true
