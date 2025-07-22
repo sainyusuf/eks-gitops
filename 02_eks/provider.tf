@@ -1,3 +1,4 @@
+# Provider configuration for AWS, Kubernetes, and Helm in Terraform
 terraform {
   required_providers {
     aws        = { source = "hashicorp/aws", version = ">= 5.50" }
