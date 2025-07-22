@@ -132,77 +132,77 @@ resource "aws_ec2_tag" "subnet_discovery" {
   value       = "true"
 }
 
-resource "kubernetes_namespace" "external_secrets" {
-  metadata {
-    name = "external-secrets"
-  }
-}
+# resource "kubernetes_namespace" "external_secrets" {
+#   metadata {
+#     name = "external-secrets"
+#   }
+# }
 
-resource "helm_release" "external_secrets" {
-  depends_on = [kubernetes_namespace.external_secrets, aws_iam_role.eso]
-  name       = "external-secrets"
-  repository = "https://charts.external-secrets.io"
-  chart      = "external-secrets"
-  namespace  = kubernetes_namespace.external_secrets.metadata[0].name
-  version    = "0.18.1"
+# resource "helm_release" "external_secrets" {
+#   depends_on = [kubernetes_namespace.external_secrets, aws_iam_role.eso]
+#   name       = "external-secrets"
+#   repository = "https://charts.external-secrets.io"
+#   chart      = "external-secrets"
+#   namespace  = kubernetes_namespace.external_secrets.metadata[0].name
+#   version    = "0.18.1"
 
-  values = [
-    templatefile("files/external-secrets/values.yaml", {
-      eso_iam_role_arn = aws_iam_role.eso.arn
-    })
-  ]
-}
+#   values = [
+#     templatefile("files/external-secrets/values.yaml", {
+#       eso_iam_role_arn = aws_iam_role.eso.arn
+#     })
+#   ]
+# }
 
-resource "kubernetes_manifest" "cluster_secret_store" {
-  depends_on = [helm_release.external_secrets]
-  manifest = {
-    apiVersion = "external-secrets.io/v1"
-    kind       = "ClusterSecretStore"
-    metadata = {
-      name = "cluster-secret-store"
-    }
-    spec = {
-      provider = {
-        aws = {
-          region  = var.region
-          service = "SecretsManager"
-          auth = {
-            jwt = {
-              serviceAccountRef = {
-                name      = "external-secrets"
-                namespace = "external-secrets"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+# resource "kubernetes_manifest" "cluster_secret_store" {
+#   depends_on = [helm_release.external_secrets]
+#   manifest = {
+#     apiVersion = "external-secrets.io/v1"
+#     kind       = "ClusterSecretStore"
+#     metadata = {
+#       name = "cluster-secret-store"
+#     }
+#     spec = {
+#       provider = {
+#         aws = {
+#           region  = var.region
+#           service = "SecretsManager"
+#           auth = {
+#             jwt = {
+#               serviceAccountRef = {
+#                 name      = "external-secrets"
+#                 namespace = "external-secrets"
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
 
-resource "kubernetes_manifest" "cluster_secret_parameter_store" {
-  depends_on = [helm_release.external_secrets]
-  manifest = {
-    apiVersion = "external-secrets.io/v1"
-    kind       = "ClusterSecretStore"
-    metadata = {
-      name = "cluster-parameter-secret-store"
-    }
-    spec = {
-      provider = {
-        aws = {
-          region  = var.region
-          service = "ParameterStore"
-          auth = {
-            jwt = {
-              serviceAccountRef = {
-                name      = "external-secrets"
-                namespace = "external-secrets"
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
+# resource "kubernetes_manifest" "cluster_secret_parameter_store" {
+#   depends_on = [helm_release.external_secrets]
+#   manifest = {
+#     apiVersion = "external-secrets.io/v1"
+#     kind       = "ClusterSecretStore"
+#     metadata = {
+#       name = "cluster-parameter-secret-store"
+#     }
+#     spec = {
+#       provider = {
+#         aws = {
+#           region  = var.region
+#           service = "ParameterStore"
+#           auth = {
+#             jwt = {
+#               serviceAccountRef = {
+#                 name      = "external-secrets"
+#                 namespace = "external-secrets"
+#               }
+#             }
+#           }
+#         }
+#       }
+#     }
+#   }
+# }
