@@ -36,9 +36,9 @@ module "eks" {
     karpenter = {
       ami_type       = "BOTTLEROCKET_x86_64"
       instance_types = ["t3.large"]
-      min_size       = 2
+      min_size       = 1
       max_size       = 4
-      desired_size   = 2
+      desired_size   = 1
       capacity_type  = "ON_DEMAND"
       labels = {
         "karpenter.sh/controller" = "true"
