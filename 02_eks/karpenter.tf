@@ -1,4 +1,4 @@
-module "karpenter" {
+/* module "karpenter" {
 
   source  = "terraform-aws-modules/eks/aws//modules/karpenter"
   version = "20.37.1"
@@ -107,3 +107,4 @@ resource "kubernetes_manifest" "karpenter_objects" {
     helm_release.karpenter
   ]
 }
+ */
