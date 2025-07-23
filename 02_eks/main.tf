@@ -1,4 +1,4 @@
-/* module "eks" {
+module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.37.1"
 
@@ -92,7 +92,7 @@
   tags = var.tags
 }
 
-module "eks_managed_addon" {
+/* module "eks_managed_addon" {
   depends_on = [module.eks.eks_managed_node_groups]
 
   source            = "aws-ia/eks-blueprints-addons/aws"
