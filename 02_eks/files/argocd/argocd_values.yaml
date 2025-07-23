@@ -1,0 +1,77 @@
+server:
+  extraArgs:
+    - --insecure
+  service:
+    type: NodePort
+  serviceAccount:
+    name: argocd-server
+    annotations:
+      eks.amazonaws.com/role-arn: ${argocd_iam_role_arn}
+  # tolerations:
+  #   - key:    "node-role.kubernetes.io/system"
+  #     operator: "Exists"
+  #     effect:   "NoSchedule"
+
+# repoServer:
+#   tolerations:
+#     - key:    "node-role.kubernetes.io/system"
+#       operator: "Exists"
+#       effect:   "NoSchedule"
+
+# applicationController:
+#   tolerations:
+#     - key:    "node-role.kubernetes.io/system"
+#       operator: "Exists"
+#       effect:   "NoSchedule"
+
+dex:
+  volumes:
+    - name: saml-ca
+      secret:
+        secretName: argocd-saml-ca-cert
+        items:
+          - key: ca.pem
+            path: ca.pem
+  volumeMounts:
+    - name: saml-ca
+      mountPath: /etc/dex/saml-ca
+      readOnly: true
+  # tolerations:
+  #   - key:    "node-role.kubernetes.io/system"
+  #     operator: "Exists"
+  #     effect:   "NoSchedule"
+
+redis:
+  persistence:
+    storageClass: gp3
+  # tolerations:
+  #   - key:    "node-role.kubernetes.io/system"
+  #     operator: "Exists"
+  #     effect:   "NoSchedule"
+
+configs:
+  params:
+    server.insecure: "true"
+  cm:
+    url: https://argo.shared-service.starfish-rentals.com
+    data.url: https://argo.shared-service.starfish-rentals.com
+    dex.config: |
+      logger:
+        level: debug
+        format: json
+      connectors:
+        - type: saml
+          id: aws
+          name: "AWS IAM Identity Center"
+          config:
+            ssoURL: https://portal.sso.eu-central-1.amazonaws.com/saml/assertion/NjU0NjU0MTY1MDY4X2lucy1kNmRlOTgxZDRlNjFjMzZj
+            ca: /etc/dex/saml-ca/ca.pem
+            entityIssuer: https://argo.shared-service.starfish-rentals.com/api/dex/callback
+            redirectURI: https://argo.shared-service.starfish-rentals.com/api/dex/callback
+            usernameAttr: email
+            emailAttr: email
+            groupsAttr: groups
+  rbac:
+    policy.csv: |
+      g, ${admin_group_id}, role:admin
+    scopes: '[groups, email]'

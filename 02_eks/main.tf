@@ -31,6 +31,31 @@ module "eks" {
 
 
   authentication_mode = "API_AND_CONFIG_MAP"
+  access_entries = {
+    # argo_cd_admin = {
+    #   principal_arn     = module.argocd_irsa.iam_role_arn
+    #   kubernetes_groups = ["system:masters"]
+    # }
+    cicd_runner = {
+      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-project-github-actions-deploy-role"
+      kubernetes_groups = ["system:masters"]
+      policy_associations = {
+        admin = {
+          policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = { type = "cluster" }
+        }
+      }
+    }
+    admin_user = {
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:user/adminCloudHsn"
+      policy_associations = {
+        admin = {
+          policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
+          access_scope = { type = "cluster" }
+        }
+      }
+    }
+  }
 
   eks_managed_node_groups = {
     karpenter = {
