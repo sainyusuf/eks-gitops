@@ -4,6 +4,7 @@ module "eks" {
 
   cluster_name    = "gitops-prod-eks"
   cluster_version = "1.33"
+  create_kms_key  = false
 
   vpc_id     = data.terraform_remote_state.infra.outputs.shared_vpc_id_prod
   subnet_ids = data.terraform_remote_state.infra.outputs.shared_vpc_id_prod_private_subnet_ids
