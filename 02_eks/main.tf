@@ -14,20 +14,20 @@ module "eks" {
   enable_irsa                              = true
   enable_cluster_creator_admin_permissions = false
 
-  # cluster_addons = {
-  #   vpc-cni                = { most_recent = true }
-  #   coredns                = { most_recent = true }
-  #   kube-proxy             = { most_recent = true }
-  #   eks-pod-identity-agent = { most_recent = true }
-  #   aws-ebs-csi-driver = {
-  #     most_recent              = true
-  #     service_account_role_arn = module.ebs_csi_irsa.iam_role_arn
-  #   }
-  #   aws-efs-csi-driver = {
-  #     most_recent              = true
-  #     service_account_role_arn = module.efs_csi_irsa.iam_role_arn
-  #   }
-  # }
+  cluster_addons = {
+    vpc-cni                = { most_recent = true }
+    coredns                = { most_recent = true }
+    kube-proxy             = { most_recent = true }
+    eks-pod-identity-agent = { most_recent = true }
+    aws-ebs-csi-driver = {
+      most_recent              = true
+      service_account_role_arn = module.ebs_csi_irsa.iam_role_arn
+    }
+    aws-efs-csi-driver = {
+      most_recent              = true
+      service_account_role_arn = module.efs_csi_irsa.iam_role_arn
+    }
+  }
 
 
   authentication_mode = "API_AND_CONFIG_MAP"
@@ -37,8 +37,7 @@ module "eks" {
     #   kubernetes_groups = ["system:masters"]
     # }
     cicd_runner = {
-      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-project-github-actions-deploy-role"
-      kubernetes_groups = ["system:masters"]
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-project-github-actions-deploy-role"
       policy_associations = {
         admin = {
           policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
@@ -92,79 +91,79 @@ module "eks" {
   tags = var.tags
 }
 
-# module "eks_managed_addon" {
-#   depends_on = [module.eks.eks_managed_node_groups]
+module "eks_managed_addon" {
+  depends_on = [module.eks.eks_managed_node_groups]
 
-#   source            = "aws-ia/eks-blueprints-addons/aws"
-#   version           = "~> 1.0"
-#   cluster_name      = module.eks.cluster_name
-#   cluster_endpoint  = module.eks.cluster_endpoint
-#   oidc_provider_arn = module.eks.oidc_provider_arn
-#   cluster_version   = module.eks.cluster_version
+  source            = "aws-ia/eks-blueprints-addons/aws"
+  version           = "~> 1.0"
+  cluster_name      = module.eks.cluster_name
+  cluster_endpoint  = module.eks.cluster_endpoint
+  oidc_provider_arn = module.eks.oidc_provider_arn
+  cluster_version   = module.eks.cluster_version
 
-#   enable_cert_manager                 = true
-#   enable_aws_load_balancer_controller = true
-#   aws_load_balancer_controller = {
-#     service_account_role_arn = module.alb_irsa.iam_role_arn
-#     create_service_account   = true
-#     service_account_name     = "aws-load-balancer-controller"
-#   }
-# }
+  enable_cert_manager                 = true
+  enable_aws_load_balancer_controller = true
+  aws_load_balancer_controller = {
+    service_account_role_arn = module.alb_irsa.iam_role_arn
+    create_service_account   = true
+    service_account_name     = "aws-load-balancer-controller"
+  }
+}
 
-# module "ebs_csi_irsa" {
-#   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-#   version = "5.58.0"
+module "ebs_csi_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.58.0"
 
-#   role_name             = "${local.prefix}-ebs-csi"
-#   attach_ebs_csi_policy = true
+  role_name             = "${local.prefix}-ebs-csi"
+  attach_ebs_csi_policy = true
 
-#   oidc_providers = {
-#     main = {
-#       provider_arn               = module.eks.oidc_provider_arn
-#       namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
-#     }
-#   }
-#   tags = var.tags
-# }
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
+  tags = var.tags
+}
 
-# module "efs_csi_irsa" {
-#   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-#   version = "5.58.0"
+module "efs_csi_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.58.0"
 
-#   role_name             = "${local.prefix}-efs-csi"
-#   attach_efs_csi_policy = true
+  role_name             = "${local.prefix}-efs-csi"
+  attach_efs_csi_policy = true
 
-#   oidc_providers = {
-#     main = {
-#       provider_arn               = module.eks.oidc_provider_arn
-#       namespace_service_accounts = ["kube-system:efs-csi-controller-sa"]
-#     }
-#   }
-#   tags = var.tags
-# }
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:efs-csi-controller-sa"]
+    }
+  }
+  tags = var.tags
+}
 
-# module "alb_irsa" {
-#   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
-#   version = "5.58.0"
+module "alb_irsa" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "5.58.0"
 
-#   role_name                              = "${local.prefix}-alb"
-#   attach_load_balancer_controller_policy = true
+  role_name                              = "${local.prefix}-alb"
+  attach_load_balancer_controller_policy = true
 
-#   oidc_providers = {
-#     main = {
-#       provider_arn               = module.eks.oidc_provider_arn
-#       namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
-#     }
-#   }
-#   tags = var.tags
-# }
+  oidc_providers = {
+    main = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:aws-load-balancer-controller"]
+    }
+  }
+  tags = var.tags
+}
 
-# resource "aws_ec2_tag" "subnet_discovery" {
-#   for_each    = toset(data.terraform_remote_state.infra.outputs.shared_vpc_id_prod_private_subnet_ids)
-#   resource_id = each.value
-#   key         = "karpenter.sh/discovery/${module.eks.cluster_name}"
-#   value       = "true"
-# }
+resource "aws_ec2_tag" "subnet_discovery" {
+  for_each    = toset(data.terraform_remote_state.infra.outputs.shared_vpc_id_prod_private_subnet_ids)
+  resource_id = each.value
+  key         = "karpenter.sh/discovery/${module.eks.cluster_name}"
+  value       = "true"
+}
 
 # resource "kubernetes_namespace" "external_secrets" {
 #   metadata {
