@@ -1,4 +1,4 @@
-data "aws_iam_policy_document" "eso_allow" {
+/* data "aws_iam_policy_document" "eso_allow" {
   statement {
     sid    = "ReadRDSMasterSecret"
     effect = "Allow"
@@ -44,3 +44,4 @@ resource "aws_iam_role_policy_attachment" "eso" {
   role       = aws_iam_role.eso.name
   policy_arn = aws_iam_policy.eso_trust.arn
 }
+ */
