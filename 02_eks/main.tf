@@ -37,8 +37,7 @@ module "eks" {
     #   kubernetes_groups = ["system:masters"]
     # }
     cicd_runner = {
-      principal_arn     = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-project-github-actions-deploy-role"
-      kubernetes_groups = ["system:masters"]
+      principal_arn = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/gitops-project-github-actions-deploy-role"
       policy_associations = {
         admin = {
           policy_arn   = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
@@ -92,24 +91,24 @@ module "eks" {
   tags = var.tags
 }
 
-module "eks_managed_addon" {
-  depends_on = [module.eks.eks_managed_node_groups]
+# module "eks_managed_addon" {
+#   depends_on = [module.eks.eks_managed_node_groups]
 
-  source            = "aws-ia/eks-blueprints-addons/aws"
-  version           = "~> 1.0"
-  cluster_name      = module.eks.cluster_name
-  cluster_endpoint  = module.eks.cluster_endpoint
-  oidc_provider_arn = module.eks.oidc_provider_arn
-  cluster_version   = module.eks.cluster_version
+#   source            = "aws-ia/eks-blueprints-addons/aws"
+#   version           = "~> 1.0"
+#   cluster_name      = module.eks.cluster_name
+#   cluster_endpoint  = module.eks.cluster_endpoint
+#   oidc_provider_arn = module.eks.oidc_provider_arn
+#   cluster_version   = module.eks.cluster_version
 
-  enable_cert_manager                 = true
-  enable_aws_load_balancer_controller = true
-  aws_load_balancer_controller = {
-    service_account_role_arn = module.alb_irsa.iam_role_arn
-    create_service_account   = true
-    service_account_name     = "aws-load-balancer-controller"
-  }
-}
+#   enable_cert_manager                 = true
+#   enable_aws_load_balancer_controller = true
+#   aws_load_balancer_controller = {
+#     service_account_role_arn = module.alb_irsa.iam_role_arn
+#     create_service_account   = true
+#     service_account_name     = "aws-load-balancer-controller"
+#   }
+# }
 
 module "ebs_csi_irsa" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
