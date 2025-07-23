@@ -1,4 +1,4 @@
-module "eks" {
+/* module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "20.37.1"
 
@@ -164,7 +164,7 @@ resource "aws_ec2_tag" "subnet_discovery" {
   resource_id = each.value
   key         = "karpenter.sh/discovery/${module.eks.cluster_name}"
   value       = "true"
-}
+} */
 
 # resource "kubernetes_namespace" "external_secrets" {
 #   metadata {
