@@ -5,10 +5,12 @@ module "eks" {
   cluster_name    = "gitops-prod-eks"
   cluster_version = "1.33"
   create_kms_key  = false
-  cluster_encryption_config = [{
-    provider_key_arn = "arn:aws:kms:eu-central-1:302879626612:key/e2ef46d4-da82-432e-82e5-5bf06c0da9d4"
-    resources        = ["secrets"]
-  }]
+  cluster_encryption_config = [
+    {
+      provider_key_arn = "arn:aws:kms:eu-central-1:302879626612:key/e2ef46d4-da82-432e-82e5-5bf06c0da9d4"
+      resources        = ["secrets"]
+    }
+  ]
 
   vpc_id     = data.terraform_remote_state.infra.outputs.shared_vpc_id_prod
   subnet_ids = data.terraform_remote_state.infra.outputs.shared_vpc_id_prod_private_subnet_ids
