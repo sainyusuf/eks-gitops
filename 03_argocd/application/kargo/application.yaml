@@ -16,7 +16,7 @@ spec:
       chart: kargo
       helm:
         valueFiles:
-          - $values/env/dev/charts/kargo/values.yaml
+          - $values/env/dev/kargo/values.yaml
     - repoURL:  https://github.com/sainyusuf/eks-gitops
       targetRevision: main
       ref: values
