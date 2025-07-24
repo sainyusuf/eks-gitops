@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kargo
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  project: default
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: kargo
+  sources:
+    - repoURL: ghcr.io/akuity/kargo-charts
+      targetRevision: 1.6.0
+      chart: kargo
+      helm:
+        valueFiles:
+          - $values/env/dev/charts/kargo/values.yaml
+    - repoURL:  https://github.com/sainyusuf/eks-gitops
+      targetRevision: main
+      ref: values
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
