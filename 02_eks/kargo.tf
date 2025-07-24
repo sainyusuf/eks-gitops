@@ -7,3 +7,12 @@ module "kargo_irsa" {
   service_account  = "kargo-controller"
   eks_cluster_name = module.eks.cluster_name
 }
+
+module "kargo_dns_ingress" {
+  source           = "../modules/dns_record_ingress"
+  hosted_zone_name = "tukang-awan.com"
+  ingress_name     = "kargo-api"
+  server_namespace = "kargo"
+  subdomain_name   = "kargo"
+  cluster_name     = module.eks.cluster_name
+}
