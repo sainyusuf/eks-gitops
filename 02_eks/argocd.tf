@@ -29,7 +29,7 @@ module "argocd" {
 
 module "argocd_dns_ingress" {
   source           = "../modules/dns_record_ingress"
-  hosted_zone_name = "tukangawan.com"
+  hosted_zone_name = "tukang-awan.com"
   ingress_name     = "argocd-server-ingress"
   server_namespace = "argocd"
   subdomain_name   = "argocd"
