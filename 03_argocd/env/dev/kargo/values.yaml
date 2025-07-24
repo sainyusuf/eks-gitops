@@ -290,7 +290,7 @@ controller:
   ## All settings relating to the service account for the controller
   serviceAccount:
     ## @param controller.serviceAccount.iamRole Specifies the ARN of an AWS IAM role to be used by the controller in an IRSA-enabled EKS cluster.
-    iamRole: "arn:aws:iam::975050358414:role/KargoIRSA"
+    iamRole: "arn:aws:iam::302879626612:role/kargo-role"
     ## @param controller.serviceAccount.clusterWideSecretReadingEnabled Specifies whether the controller's ServiceAccount should be granted read permissions to Secrets CLUSTER-WIDE in the Kargo control plane's cluster. Enabling this is highly discouraged and you do so at your own peril. When this is NOT enabled, the Kargo management controller will dynamically expand and contract the controller's permissions to read Secrets on a Project-by-Project basis.
     clusterWideSecretReadingEnabled: false
 
