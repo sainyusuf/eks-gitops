@@ -111,7 +111,7 @@ api:
     ## @param api.adminAccount.passwordHash Bcrypt password hash for the admin account. A value **must** be provided for this field unless `api.secret.name` is specified.
     passwordHash: $2y$10$8EK/AZ2Mu86v8RJagxfRg.Zb7EpcEX4gppeEgpGGj54CYvYpGVc7K
     ## @param api.adminAccount.tokenSigningKey Key used to sign ID tokens (JWTs) for the admin account. It is suggested that you generate this using a password manager or a command like: `openssl rand -base64 29 \| tr -d "=+/" \| cut`. A value **must** be provided for this field, unless `api.secret.name` is specified.
-    tokenSigningKey: VklwQ05XTEFOS2ZQSEZVV0FLUzE0SnZ2OFVVaHlZYVE=
+    tokenSigningKey: Wlh5YXdWblp4b1hZZjZTR29ka2kK
     ## @param api.adminAccount.tokenTTL Specifies how long ID tokens for the admin account are valid. (i.e. The expiry will be the time of issue plus this duration.)
     tokenTTL: 24h
 
