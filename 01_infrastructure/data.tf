@@ -9,3 +9,8 @@ data "aws_ami" "amazon_linux_arm" {
     values = ["amzn2-ami-hvm-*-arm64-gp2"]
   }
 }
+
+data "aws_route53_zone" "this" {
+  name         = "tukang-awan.com"
+  private_zone = false
+}
