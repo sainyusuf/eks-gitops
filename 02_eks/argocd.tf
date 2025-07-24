@@ -28,6 +28,7 @@ module "argocd" {
 }
 
 module "argocd_dns_ingress" {
+  depends_on       = [module.argocd]
   source           = "../modules/dns_record_ingress"
   hosted_zone_name = "tukang-awan.com"
   ingress_name     = "argocd-server-ingress"
