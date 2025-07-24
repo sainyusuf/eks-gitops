@@ -74,7 +74,10 @@ Resources:
               StringEquals:
                 token.actions.githubusercontent.com:aud: sts.amazonaws.com
               StringLike:
-                token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOrganization}/${GitHubRepository}:*'
+                token.actions.githubusercontent.com:sub:
+                - !Sub 'repo:${GitHubOrganization}/${GitHubRepository}:*'
+                - !Sub 'repo:${GitHubOrganization}/*'
+                  #token.actions.githubusercontent.com:sub: !Sub 'repo:${GitHubOrganization}/*'
       Path: /
       Policies:
         - PolicyName: !Sub '${WorkloadName}-github-actions-inline-deploy-policy'
