@@ -13,4 +13,11 @@ module "vpc" {
   one_nat_gateway_per_az = false
   enable_vpn_gateway     = false
 
+  public_subnet_tags = {
+    "kubernetes.io/role/elb" = "1"
+  }
+  private_subnet_tags = {
+    "kubernetes.io/role/internal-elb"                = "1"
+    "karpenter.sh/discovery/shared-service-prod-eks" = "true"
+  }
 }
