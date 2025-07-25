@@ -6,7 +6,7 @@ metadata:
 spec:
   generators:
   - git:
-      repoURL: https://github.com/sainyusuf/eks-gitops
+      repoURL: https://github.com/sainyusuf/eks-gitops.git
       revision: main
       directories:
       - path: 03_argocd/env/*
@@ -22,7 +22,7 @@ spec:
       project: flask
       source:
         path: 03_argocd/charts/flask
-        repoURL: https://github.com/sainyusuf/eks-gitops
+        repoURL: https://github.com/sainyusuf/eks-gitops.git
         targetRevision: main
         helm:
           valueFiles:
