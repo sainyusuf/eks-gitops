@@ -1,0 +1,43 @@
+apiVersion: kargo.akuity.io/v1alpha1
+kind: PromotionTask
+metadata:
+  name: promote
+  namespace: kargo-flask
+spec:
+  vars:
+  - name: image
+    value: 975050358414.dkr.ecr.eu-central-1.amazonaws.com/flask-app
+  - name: repoURL
+    value: https://github.com/Devoteam/DEACloud_eks_workload.git
+  - name: branch
+    value: dev
+  - name: envPath
+  - name: argocdApp
+
+  steps:
+  - uses: git-clone
+    config:
+      repoURL: ${{ vars.repoURL }}
+      checkout:
+      - branch: ${{ vars.branch }}
+        path: ./out
+  - uses: yaml-update
+    as: update-image
+    config:
+      path: ./out/${{ vars.envPath }}/values.yaml
+      updates:
+      - key: image.tag
+        value: ${{ imageFrom( vars.image ).Tag }}
+  - uses: git-commit
+    as: commit
+    config:
+      path: ./out
+      message: ${{ task.outputs['update-image'].commitMessage }}
+  - uses: git-push
+    as: push
+    config:
+      path: ./out
+  - uses: argocd-update
+    config:
+      apps:
+      - name: ${{ vars.argocdApp }}

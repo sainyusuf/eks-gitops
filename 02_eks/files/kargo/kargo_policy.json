@@ -6,7 +6,8 @@
         "Action": [
           "ecr:GetDownloadUrlForLayer",
           "ecr:BatchGetImage",
-          "ecr:DescribeImages"
+          "ecr:DescribeImages",
+          "ecr:GetAuthorizationToken"
         ],
         "Resource": "*"
       },
