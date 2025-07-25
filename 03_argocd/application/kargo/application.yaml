@@ -12,7 +12,7 @@ spec:
     namespace: kargo
   sources:
     - repoURL: ghcr.io/akuity/kargo-charts
-      targetRevision: 1.5.0
+      targetRevision: 1.6.0
       chart: kargo
       helm:
         valueFiles:

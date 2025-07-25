@@ -1,0 +1,33 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: flask
+  namespace: argocd
+spec:
+  generators:
+  - git:
+      repoURL: https://github.com/sainyusuf/eks-gitops
+      revision: main
+      directories:
+      - path: env/*
+  template:
+    metadata:
+      name: flask-{{path.basename}}
+      annotations:
+        kargo.akuity.io/authorized-stage: "flask:{{path.basename}}"
+    spec:
+      destination:
+        namespace: flask-{{path.basename}}
+        server: https://kubernetes.default.svc
+      project: flask
+      source:
+        path: charts/flask
+        repoURL: https://github.com/sainyusuf/eks-gitops
+        targetRevision: main
+        helm:
+          valueFiles:
+            - "/env/{{path.basename}}/flask/values.yaml"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
