@@ -7,5 +7,5 @@ spec:
   subscriptions:
   - image:
       repoURL: 302879626612.dkr.ecr.eu-central-1.amazonaws.com/flask
-      imageSelectionStrategy: Lexical
+      imageSelectionStrategy: SemVer
       discoveryLimit: 10

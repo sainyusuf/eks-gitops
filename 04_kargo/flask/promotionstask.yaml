@@ -6,11 +6,11 @@ metadata:
 spec:
   vars:
   - name: image
-    value: 975050358414.dkr.ecr.eu-central-1.amazonaws.com/flask-app
+    value: 302879626612.dkr.ecr.eu-central-1.amazonaws.com/flask
   - name: repoURL
-    value: https://github.com/Devoteam/DEACloud_eks_workload.git
+    value: https://github.com/sainyusuf/eks-gitops.git
   - name: branch
-    value: dev
+    value: main
   - name: envPath
   - name: argocdApp
 
