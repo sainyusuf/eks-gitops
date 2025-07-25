@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: kargo-flask
+  name: flask
   namespace: argocd
 spec:
   clusterResourceWhitelist:
@@ -15,4 +15,4 @@ spec:
   - group: '*'
     kind: '*'
   sourceRepos:
-  - https://github.com/sainyusuf/eks-gitops
+  - https://github.com/sainyusuf/eks-gitops.git
