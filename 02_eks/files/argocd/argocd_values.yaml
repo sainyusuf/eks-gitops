@@ -39,5 +39,6 @@ configs:
     url: https://argocd.tukang-awan.com
     data.url: https://argocd.tukang-awan.com
     admin.enabled: true
+    timeout.reconciliation: 30s
   secret:
     admin.password: "$2a$10$zBMumLfx/DzU6.13S7N9ZuW6q1GdRNff.Wyo2roSE13u1xnfEoM5i"
