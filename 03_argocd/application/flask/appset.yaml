@@ -9,7 +9,7 @@ spec:
       repoURL: https://github.com/sainyusuf/eks-gitops
       revision: main
       directories:
-      - path: env/*
+      - path: 03_argocd/env/*
   template:
     metadata:
       name: flask-{{path.basename}}
@@ -21,12 +21,12 @@ spec:
         server: https://kubernetes.default.svc
       project: flask
       source:
-        path: charts/flask
+        path: 03_argocd/charts/flask
         repoURL: https://github.com/sainyusuf/eks-gitops
         targetRevision: main
         helm:
           valueFiles:
-            - "/env/{{path.basename}}/flask/values.yaml"
+            - "03_argocd/env/{{path.basename}}/flask/values.yaml"
       syncPolicy:
         automated:
           prune: true
