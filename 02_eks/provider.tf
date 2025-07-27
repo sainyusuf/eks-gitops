@@ -20,11 +20,11 @@ terraform {
   }
 }
 
-locals {
-  aws_region           = "eu-central-1"
-  eks_cluster_endpoint = module.eks.cluster_endpoint
-  eks_cluster_ca       = base64decode(module.eks.cluster_certificate_authority_data)
-}
+# locals {
+#   aws_region           = "eu-central-1"
+#   eks_cluster_endpoint = module.eks.cluster_endpoint
+#   eks_cluster_ca       = base64decode(module.eks.cluster_certificate_authority_data)
+# }
 
 # provider "kubernetes" {
 #   host                   = module.eks.cluster_endpoint
