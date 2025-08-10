@@ -166,7 +166,7 @@ resource "aws_ec2_tag" "subnet_discovery" {
   value       = "true"
 }
 
-resource "kubernetes_namespace" "external_secrets" {
+/* resource "kubernetes_namespace" "external_secrets" {
   depends_on = [module.eks]
   metadata {
     name = "external-secrets"
@@ -240,4 +240,4 @@ resource "kubernetes_manifest" "cluster_secret_parameter_store" {
       }
     }
   }
-}
+} */
