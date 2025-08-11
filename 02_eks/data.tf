@@ -9,9 +9,9 @@ data "terraform_remote_state" "infra" {
   }
 }
 
-data "aws_eks_cluster_auth" "this" {
-  name = module.eks.cluster_name
-}
+# data "aws_eks_cluster_auth" "this" {
+#   name = module.eks.cluster_name
+# }
 # data "aws_acm_certificate" "eks_service" {
 #   domain = "tukang-awan.com"
 # }

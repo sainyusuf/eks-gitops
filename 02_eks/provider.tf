@@ -21,21 +21,21 @@ terraform {
 }
 
 locals {
-  aws_region           = "eu-central-1"
-  eks_cluster_endpoint = module.eks.cluster_endpoint
-  eks_cluster_ca       = base64decode(module.eks.cluster_certificate_authority_data)
+  aws_region = "eu-central-1"
+  #eks_cluster_endpoint = module.eks.cluster_endpoint
+  #eks_cluster_ca       = base64decode(module.eks.cluster_certificate_authority_data)
 }
 
-provider "kubernetes" {
-  host                   = module.eks.cluster_endpoint
-  cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-  token                  = data.aws_eks_cluster_auth.this.token
-}
+# provider "kubernetes" {
+#   host                   = module.eks.cluster_endpoint
+#   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+#   token                  = data.aws_eks_cluster_auth.this.token
+# }
 
-provider "helm" {
-  kubernetes {
-    host                   = module.eks.cluster_endpoint
-    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    token                  = data.aws_eks_cluster_auth.this.token
-  }
-}
+# provider "helm" {
+#   kubernetes {
+#     host                   = module.eks.cluster_endpoint
+#     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+#     token                  = data.aws_eks_cluster_auth.this.token
+#   }
+# }
