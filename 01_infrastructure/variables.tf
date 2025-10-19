@@ -18,3 +18,8 @@ variable "gitops_domain_name" {
   type        = string
   default     = "tukang-awan.com"
 }
+variable "cluster_name" {
+  description = "The name of the EKS cluster"
+  type        = string
+  default     = "gitops-prod-eks"
+}
