@@ -17,7 +17,7 @@ module "vpc" {
     "kubernetes.io/role/elb" = "1"
   }
   private_subnet_tags = {
-    "kubernetes.io/role/internal-elb"                = "1"
-    "karpenter.sh/discovery/shared-service-prod-eks" = "true"
+    "kubernetes.io/role/internal-elb" = "1"
+    "karpenter.sh/discovery"          = var.cluster_name
   }
 }
