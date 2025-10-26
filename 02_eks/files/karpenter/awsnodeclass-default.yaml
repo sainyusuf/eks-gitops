@@ -5,10 +5,43 @@ metadata:
 spec:
   amiSelectorTerms:
     - alias: bottlerocket@latest
-  instanceProfile: ${instance_profile_name}
+  role: gitops-prod-eks-karpenter-node-role
   subnetSelectorTerms:
     - tags:
-        karpenter.sh/discovery/shared-service-prod-eks : "true"
+        karpenter.sh/discovery : "gitops-prod-eks"
   securityGroupSelectorTerms:
     - tags:
-        karpenter.sh/discovery/shared-service-prod-eks : "true"
+        karpenter.sh/discovery : "gitops-prod-eks"
+  tags:
+    karpenter.sh/discovery: "gitops-prod-eks"
+---
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: default
+spec:
+  template:
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+      requirements:
+        - key: "kubernetes.io/arch"
+          operator: In
+          values: ["arm64"]
+        - key: "karpenter.k8s.aws/capacity-type"
+          operator: In
+          values: ["spot"]
+        - key: "karpenter.k8s.aws/instance-family"
+          operator: In
+          values: ["t4g", "m7g"]
+        - key: "karpenter.k8s.aws/instance-size"
+          operator: In
+          values: ["medium", "large"]
+
+  limits:
+    cpu: 1000
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized
+    consolidateAfter: 30s
