@@ -30,15 +30,15 @@ spec:
         - key: "kubernetes.io/arch"
           operator: In
           values: ["arm64"]
-        - key: "karpenter.sh/capacity-type"
+        - key: "karpenter.k8s.aws/capacity-type"
           operator: In
           values: ["spot"]
         - key: "karpenter.k8s.aws/instance-family"
           operator: In
-          values: ["m7g"]
+          values: ["t4g", "m7g"]
         - key: "karpenter.k8s.aws/instance-size"
           operator: In
-          values: ["large"]
+          values: ["medium", "large"]
 
   limits:
     cpu: 1000
