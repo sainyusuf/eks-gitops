@@ -15,3 +15,7 @@ data "terraform_remote_state" "infra" {
 # data "aws_acm_certificate" "eks_service" {
 #   domain = "tukang-awan.com"
 # }
+
+# data "aws_ecrpublic_authorization_token" "token" {
+#   provider = aws.virginia
+# }
