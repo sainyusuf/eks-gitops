@@ -1,5 +1,6 @@
 ### Data block
 data "aws_caller_identity" "current" {}
+
 data "terraform_remote_state" "infra" {
   backend = "s3"
   config = {
@@ -7,15 +8,4 @@ data "terraform_remote_state" "infra" {
     key    = "01_infrastructure/terraform.tfstate"
     region = "eu-central-1"
   }
-}
-
-data "aws_eks_cluster_auth" "this" {
-  name = module.eks.cluster_name
-}
-# data "aws_acm_certificate" "eks_service" {
-#   domain = "tukang-awan.com"
-# }
-
-data "aws_ecrpublic_authorization_token" "token" {
-  provider = aws.virginia
 }
