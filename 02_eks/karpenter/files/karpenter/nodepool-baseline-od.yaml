@@ -1,0 +1,55 @@
+apiVersion: karpenter.sh/v1
+kind: NodePool
+metadata:
+  name: baseline-od
+
+spec:
+  # Weight: Higher weight means this pool is preferred for matching pods
+  # CoreDNS and system workloads will schedule here
+  weight: 10
+  
+  limits:
+    cpu: "16"      # Capacity for on-demand workloads including CoreDNS
+    memory: 32Gi
+
+  disruption:
+    consolidationPolicy: WhenEmptyOrUnderutilized  # More aggressive to save costs
+    consolidateAfter: 15m  # Increased from 5m to give more stability
+    budgets:
+      - nodes: "10%"  # Allow disruption of up to 10% of nodes at a time
+
+  template:
+    metadata:
+      labels:
+        workload: baseline
+        node-type: on-demand
+        cost-category: stable
+    spec:
+      nodeClassRef:
+        group: karpenter.k8s.aws
+        kind: EC2NodeClass
+        name: default
+      expireAfter: Never  # Don't expire on-demand nodes
+      
+      requirements:
+        # On-demand for stability
+        - key: karpenter.sh/capacity-type
+          operator: In
+          values: ["on-demand"]
+        
+        # ARM instances for cost savings (up to 20% cheaper)
+        - key: kubernetes.io/arch
+          operator: In
+          values: ["arm64"]
+        
+        # Cheap ARM instance families
+        - key: karpenter.k8s.aws/instance-family
+          operator: In
+          values: ["t4g", "c7g", "m7g"]  # Graviton processors
+        
+        # Small to medium sizes
+        - key: karpenter.k8s.aws/instance-size
+          operator: In
+          values: ["medium", "large"]
+      
+      # NO taints - allow CoreDNS and other system workloads to schedule here

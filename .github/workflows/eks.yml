@@ -19,7 +19,7 @@ on:
 
 env:
   TF_VERSION: 1.11.4
-  TF_PLUGIN_CACHE_DIR: ~/.terraform.d/plugin-cache
+  TF_PLUGIN_CACHE_DIR: /home/runner/.terraform.d/plugin-cache
 
 
 jobs:
@@ -36,6 +36,9 @@ jobs:
         with:
           terraform_version: ${{ env.TF_VERSION }}
           terraform_wrapper: false
+
+      - name: Create Plugin Cache Dir
+        run: mkdir -p ${{ env.TF_PLUGIN_CACHE_DIR }}
 
       - name: Terraform Format Check
         run: terraform fmt -check -recursive
